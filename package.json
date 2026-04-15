@@ -1,7 +1,7 @@
 {
-  "name": "inngest-agent-example",
+  "name": "inngest-self-learning-agent",
   "version": "0.1.0",
-  "description": "A durable AI agent built with Inngest + pi-ai — think/act/observe loop, Telegram integration, local development via connect()",
+  "description": "A durable self-learning AI agent built with Inngest + pi-ai that scores responses and iterates on prompts",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {

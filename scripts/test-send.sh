@@ -23,6 +23,13 @@ if [[ -z "$INNGEST_EVENT_KEY" ]]; then
   fi
 fi
 
+
+# Print resolved config
+echo "INNGEST_URL:       ${INNGEST_URL:-<not set>}"
+echo "INNGEST_EVENT_KEY: ${INNGEST_EVENT_KEY:-<not set>}"
+
+
+
 # Determine endpoint
 if [[ -n "$INNGEST_URL" ]]; then
   # Local dev server
@@ -37,7 +44,7 @@ else
   echo "  Or add INNGEST_EVENT_KEY to your .env file."
   exit 1
 fi
-DELAY="${DELAY:-5}"
+DELAY="${DELAY:-1}"
 BATCH=""
 QUESTIONS_FILE="$(dirname "$0")/../workspace/test-questions.md"
 

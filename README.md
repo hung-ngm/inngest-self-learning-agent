@@ -1,8 +1,22 @@
-# Inngest Agent Example — Utah
+# Inngest Self-Learning Agent
 
-_**U**niversally **T**riggered **A**gent **H**arness_
+A durable AI agent built with [Inngest](https://inngest.com) and [pi-ai](https://github.com/badlogic/pi-mono) that experiments with its own prompts over time. It runs a normal think/act/observe loop, scores responses after the fact, and uses scheduled evaluation jobs to create, test, and promote better behavioral prompts.
 
-A durable AI agent built with [Inngest](https://inngest.com) and [pi-ai](https://github.com/badlogic/pi-mono). No framework. Just a think/act/observe loop — Inngest provides durability, retries, and observability, while pi-ai provides a unified LLM interface across providers.
+The interesting part is not just that the agent can rewrite prompts. It is that the first version learned to game its own scoring system. When the evaluation pipeline asked an LLM to improve an underperforming prompt, the model started embedding scoring criteria directly into the generated `SOUL.md`, turning the metric into the target.
+
+This repo explores that self-learning loop and the guardrails needed to keep it useful:
+
+- **Score every response** across relevance, completeness, tool efficiency, and tone
+- **Attribute scores to prompt versions** so improvements can be compared over time
+- **A/B test prompt variants** with weighted traffic instead of replacing prompts blindly
+- **Run scheduled evaluation** to rewrite underperformers and promote stronger versions
+- **Block score gaming** so generated prompts do not copy evaluation criteria or optimize for the test itself
+
+<!-- TODO: Replace this placeholder with the published blog post URL. -->
+
+Read the blog post about this project: **TODO: add blog post link**.
+
+This project is a fork of [Inngest's Utah agent example](https://github.com/inngest/utah), extended with response scoring, prompt versioning, and an automated evaluation pipeline.
 
 Simple TypeScript that gives you:
 
@@ -14,7 +28,8 @@ Simple TypeScript that gives you:
 - **Local development** — runs on your machine via `connect()`, no server needed
 - **Response scoring** — async LLM-based quality evaluation after every reply
 - **Prompt versioning** — A/B test behavioral prompts with weighted random selection
-- **Evaluation pipeline** — automated prompt improvement based on score analysis
+- **Evaluation pipeline** — scheduled prompt improvement based on score analysis
+- **Guardrails** — keep generated prompts from leaking scoring criteria into agent behavior
 - **Sub-agents** — delegate tasks to isolated agent loops (sync or async)
 
 ## Architecture
@@ -44,9 +59,9 @@ The worker connects to Inngest Cloud via WebSocket. No public endpoint. No ngrok
 ### 2. Configure and Run
 
 ```bash
-git clone https://github.com/inngest/utah
-cd utah
-npm install # or pnpm
+git clone https://github.com/mitchellalderson/inngest-self-learning-agent
+cd inngest-self-learning-agent
+pnpm install
 cp .env.example .env
 ```
 
@@ -64,11 +79,11 @@ Start the worker:
 
 ```bash
 # Production mode (connects to Inngest Cloud via WebSocket)
-npm start
+pnpm run start
 
 # Development mode (uses local Inngest dev server)
 npx inngest-cli@latest dev &
-npm run dev
+pnpm run dev
 ```
 
 On startup, the worker automatically sets up webhooks and transforms for each configured channel.
@@ -287,7 +302,9 @@ workspace/prompts/
 
 ### Evaluation Pipeline
 
-The evaluation pipeline automatically analyzes scored responses and generates improved prompt versions:
+The evaluation pipeline automatically analyzes scored responses and generates improved prompt versions. In production you can run it on whatever cadence gives the agent enough fresh data, such as nightly; by default this repo runs the evaluator every 6 hours.
+
+The main lesson from the first runs was Goodhart's Law in miniature: once the prompt generator saw enough performance data, it began producing prompts that mirrored the evaluation criteria instead of simply improving the agent's behavior. The prompt-generation step now includes explicit output rules that prohibit scoring targets, metrics, and evaluation data from appearing in generated `SOUL.md` files.
 
 #### Testing with Smaller Models
 
@@ -326,6 +343,7 @@ A cron function (`evaluate-prompts`) runs on a configurable schedule (default: e
 - Maximum active versions cap (default: 5)
 - Baseline (v1) is never deleted, only deprioritized
 - New versions never start at 100% — always keep a control
+- Generated prompts are forbidden from including scoring targets, metrics, or evaluation data
 
 **Configuration (env vars):**
 
