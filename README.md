@@ -1,6 +1,6 @@
 # Inngest Self-Learning Agent
 
-A durable AI agent built with [Inngest](https://inngest.com) and [pi-ai](https://github.com/badlogic/pi-mono) that experiments with its own prompts over time. It runs a normal think/act/observe loop, scores responses after the fact, and uses scheduled evaluation jobs to create, test, and promote better behavioral prompts.
+A durable AI agent built with [Inngest](https://inngest.com) and [pi-ai](https://github.com/badlogic/pi-mono) that experiments with its own prompts over time. It runs a normal think/act/observe loop, scores responses after the fact, and uses scheduled evaluation jobs to create, test, and promote better behavioral prompts over time.
 
 The interesting part is not just that the agent can rewrite prompts. It is that the first version learned to game its own scoring system. When the evaluation pipeline asked an LLM to improve an underperforming prompt, the model started embedding scoring criteria directly into the generated `SOUL.md`, turning the metric into the target.
 
@@ -12,9 +12,7 @@ This repo explores that self-learning loop and the guardrails needed to keep it 
 - **Run scheduled evaluation** to rewrite underperformers and promote stronger versions
 - **Block score gaming** so generated prompts do not copy evaluation criteria or optimize for the test itself
 
-<!-- TODO: Replace this placeholder with the published blog post URL. -->
-
-Read the blog post about this project: **TODO: add blog post link**.
+Read the blog post about this project: https://www.inngest.com/blog/build-self-learning-agent
 
 This project is a fork of [Inngest's Utah agent example](https://github.com/inngest/utah), extended with response scoring, prompt versioning, and an automated evaluation pipeline.
 
