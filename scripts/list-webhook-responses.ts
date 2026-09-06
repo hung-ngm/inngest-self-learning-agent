@@ -1,7 +1,7 @@
 /**
  * Fetches all webhooks and prints their response functions.
  *
- * Usage: npx tsx scripts/list-webhook-responses.ts
+ * Usage: bun run webhooks
  */
 
 import { inngestFetch } from "../src/channels/setup-helpers.ts";

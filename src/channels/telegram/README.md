@@ -47,7 +47,7 @@ To find a chat ID, you can message the bot and check the logs — the chat ID is
 Start the worker:
 
 ```bash
-npm start
+bun start
 ```
 
 On startup, the setup script will automatically:

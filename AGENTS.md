@@ -4,8 +4,8 @@ A durable AI agent built with Inngest + pi-ai. Think/act/observe loop with multi
 
 ## Stack
 
-- **Runtime**: Node.js 23+ (native `--experimental-strip-types`, no build step)
-- **Package manager**: pnpm
+- **Runtime**: Bun 1.2+ (native TypeScript execution, no build step)
+- **Package manager**: Bun
 - **LLM interface**: pi-ai (`@mariozechner/pi-ai`) — unified `complete()` across Anthropic, OpenAI, Google
 - **Durability**: Inngest — every LLM call and tool execution is a `step.run()`
 - **Schemas**: TypeBox (`@sinclair/typebox`) for tool parameter validation
@@ -13,13 +13,18 @@ A durable AI agent built with Inngest + pi-ai. Think/act/observe loop with multi
 ## Commands
 
 ```bash
-pnpm install          # Install dependencies
-pnpm run dev          # Dev mode (local Inngest dev server, file watching)
-pnpm run start        # Production mode (connects to Inngest Cloud via WebSocket)
-pnpm run typecheck    # Type check with tsc --noEmit
+bun install           # Install dependencies
+bun run dev           # Dev mode (local Inngest dev server, file watching)
+bun start             # Production mode (connects to Inngest Cloud via WebSocket)
+bun run typecheck     # Type check with tsc --noEmit
+bun run webhooks      # List registered Inngest webhooks and their transforms
 ```
 
-No test runner is configured. There is no build step — Node runs TypeScript directly.
+No test runner is configured. There is no build step — Bun runs TypeScript directly.
+
+`bun install` reports blocked lifecycle scripts for `koffi` and `protobufjs`. Both are safe to
+leave blocked: `koffi` ships prebuilt binaries for every platform, and `protobufjs`'s postinstall
+only prints a version-scheme advisory. Do not add them to `trustedDependencies`.
 
 ## Architecture
 
@@ -41,3 +46,17 @@ No test runner is configured. There is no build step — Node runs TypeScript di
 - No build artifacts — `tsconfig.json` has `noEmit: true`
 - Config is loaded from env vars via `src/config.ts`
 - Workspace files in `workspace/` are agent-writable at runtime; source files in `src/` are not
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as markdown files under `.scratch/<feature>/` in this repo. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles are used verbatim as label strings. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.

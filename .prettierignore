@@ -1,4 +1,4 @@
 node_modules
 dist
 workspace*
-pnpm-lock.yaml
+bun.lock

@@ -46,7 +46,7 @@ The `SLACK_SIGNING_SECRET` is available in your app's **Basic Information** page
 Start the worker:
 
 ```bash
-npm start
+bun start
 ```
 
 On startup, the setup script will:
