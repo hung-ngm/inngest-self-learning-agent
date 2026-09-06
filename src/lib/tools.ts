@@ -1,7 +1,7 @@
 /** Tools — coding tools from pi-coding-agent + custom Utah tools (remember, web_fetch). */
 
-import { Type } from "@mariozechner/pi-ai";
-import type { Tool, TextContent } from "@mariozechner/pi-ai";
+import { Type } from "@earendil-works/pi-ai";
+import type { Tool, TextContent } from "@earendil-works/pi-ai";
 import {
   createReadTool,
   createEditTool,
@@ -10,8 +10,8 @@ import {
   createGrepTool,
   createFindTool,
   createLsTool,
-} from "@mariozechner/pi-coding-agent";
-import type { AgentTool } from "@mariozechner/pi-agent-core";
+} from "@earendil-works/pi-coding-agent";
+import type { AgentTool } from "@earendil-works/pi-agent-core";
 import { resolve, relative } from "path";
 import { config } from "../config.ts";
 import { appendDailyLog } from "./memory.ts";
@@ -34,7 +34,7 @@ const piTools: AgentTool<any>[] = [
   createReadTool(config.workspace.root),
   createEditTool(config.workspace.root),
   createWriteTool(config.workspace.root),
-  createBashTool(config.workspace.root),
+  createBashTool(config.workspace.root, { exposeSessionEnvironment: false }),
   createGrepTool(config.workspace.root),
   createFindTool(config.workspace.root),
   createLsTool(config.workspace.root),

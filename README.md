@@ -1,6 +1,6 @@
 # Inngest Self-Learning Agent
 
-A durable AI agent built with [Inngest](https://inngest.com) and [pi-ai](https://github.com/badlogic/pi-mono) that experiments with its own prompts over time. It runs a normal think/act/observe loop, scores responses after the fact, and uses scheduled evaluation jobs to create, test, and promote better behavioral prompts over time.
+A durable AI agent built with [Inngest](https://inngest.com) and [pi-ai](https://github.com/earendil-works/pi) that experiments with its own prompts over time. It runs a normal think/act/observe loop, scores responses after the fact, and uses scheduled evaluation jobs to create, test, and promote better behavioral prompts over time.
 
 The interesting part is not just that the agent can rewrite prompts. It is that the first version learned to game its own scoring system. When the evaluation pipeline asked an LLM to improve an underperforming prompt, the model started embedding scoring criteria directly into the generated `SOUL.md`, turning the metric into the target.
 
@@ -40,7 +40,7 @@ The worker connects to Inngest Cloud via WebSocket. No public endpoint. No ngrok
 
 ## Prerequisites
 
-- **Node.js 23+** (uses native TypeScript strip-types)
+- **[Bun](https://bun.com) 1.2+** (runs TypeScript natively — no build step)
 - LLM API key (e.g. **Anthropic API key** ([console.anthropic.com](https://console.anthropic.com)))
 - **Inngest account** ([app.inngest.com](https://app.inngest.com))
 - **At least one channel** configured (see [Channels](#channels) below)
@@ -59,7 +59,7 @@ The worker connects to Inngest Cloud via WebSocket. No public endpoint. No ngrok
 ```bash
 git clone https://github.com/mitchellalderson/inngest-self-learning-agent
 cd inngest-self-learning-agent
-pnpm install
+bun install
 cp .env.example .env
 ```
 
@@ -77,11 +77,13 @@ Start the worker:
 
 ```bash
 # Production mode (connects to Inngest Cloud via WebSocket)
-pnpm run start
+bun start
 
 # Development mode (uses local Inngest dev server)
+# Note: npx, not bunx — inngest-cli downloads its binary in a postinstall
+# script, which Bun blocks by default.
 npx inngest-cli@latest dev &
-pnpm run dev
+bun run dev
 ```
 
 On startup, the worker automatically sets up webhooks and transforms for each configured channel.
@@ -103,6 +105,7 @@ src/
 ├── agent-loop.ts              # Core think → act → observe cycle
 ├── setup.ts                   # Channel setup orchestration
 ├── lib/
+│   ├── models.ts              # Shared pi-ai Models registry + explicit API-key resolution
 │   ├── llm.ts                 # pi-ai wrapper (multi-provider: Anthropic, OpenAI, Google)
 │   ├── tools.ts               # Tool definitions (TypeBox schemas) + execution
 │   ├── context.ts             # System prompt builder with workspace file injection
@@ -151,7 +154,7 @@ workspace/                       # Agent workspace (persisted across runs)
 
 The core is a while loop where each iteration is an Inngest step:
 
-1. **Think** — `step.run("think")` calls the LLM via [pi-ai](https://github.com/badlogic/pi-mono)'s `complete()`
+1. **Think** — `step.run("think")` calls the LLM via [pi-ai](https://github.com/earendil-works/pi)'s `Models.complete()`
 2. **Act** — if the LLM wants tools, each tool runs as `step.run("tool-read")`
 3. **Observe** — tool results are fed back into the conversation
 4. **Repeat** — until the LLM responds with text (no tools) or max iterations
@@ -409,7 +412,7 @@ The agent loop, reply dispatch, and acknowledgment functions are all channel-agn
 
 ## Acknowledgments
 
-This project uses [pi-ai](https://github.com/badlogic/pi-mono) (`@mariozechner/pi-ai`) by [Mario Zechner](https://github.com/badlogic) for its unified LLM interface and `@mariozechner/pi-coding-agent` for it's. standard tools. pi-ai provides a single `complete()` function that works across Anthropic, OpenAI, Google, and other providers — making it easy to swap models without changing any agent code. It's a great library.
+This project uses [pi-ai](https://github.com/earendil-works/pi) (`@earendil-works/pi-ai`) by [Mario Zechner](https://github.com/badlogic) for its unified LLM interface and `@earendil-works/pi-coding-agent` for its standard tools. pi-ai provides a `Models` collection whose `complete()` works across Anthropic, OpenAI, Google, and other providers — making it easy to swap models without changing any agent code. It's a great library.
 
 ## License
 

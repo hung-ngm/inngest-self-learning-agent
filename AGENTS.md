@@ -6,9 +6,9 @@ A durable AI agent built with Inngest + pi-ai. Think/act/observe loop with multi
 
 - **Runtime**: Bun 1.2+ (native TypeScript execution, no build step)
 - **Package manager**: Bun
-- **LLM interface**: pi-ai (`@mariozechner/pi-ai`) — unified `complete()` across Anthropic, OpenAI, Google
+- **LLM interface**: pi-ai (`@earendil-works/pi-ai`) — unified `Models.complete()` across Anthropic, OpenAI, Google
 - **Durability**: Inngest — every LLM call and tool execution is a `step.run()`
-- **Schemas**: TypeBox (`@sinclair/typebox`) for tool parameter validation
+- **Schemas**: TypeBox (via `typebox`, re-exported by pi-ai as `Type`) for tool parameter validation
 
 ## Commands
 
@@ -22,9 +22,9 @@ bun run webhooks      # List registered Inngest webhooks and their transforms
 
 No test runner is configured. There is no build step — Bun runs TypeScript directly.
 
-`bun install` reports blocked lifecycle scripts for `koffi` and `protobufjs`. Both are safe to
-leave blocked: `koffi` ships prebuilt binaries for every platform, and `protobufjs`'s postinstall
-only prints a version-scheme advisory. Do not add them to `trustedDependencies`.
+`bun install` reports blocked lifecycle scripts for `protobufjs` and `@google/genai`. Both are safe to
+leave blocked: `protobufjs`'s postinstall only prints a version-scheme advisory, and `@google/genai`'s
+preinstall is an explicit no-op. Do not add them to `trustedDependencies`.
 
 ## Architecture
 
@@ -37,6 +37,9 @@ only prints a version-scheme advisory. Do not add them to `trustedDependencies`.
 - Channels implement the `ChannelHandler` interface (`src/channels/types.ts`) with `sendReply`, `acknowledge`, and optional `setup`
 - Workspace files (`workspace/SOUL.md`, `USER.md`, `MEMORY.md`) are injected into the system prompt
 - Tool definitions live in `src/lib/tools.ts` using TypeBox schemas
+- `src/lib/models.ts` holds **one** pi-ai `Models` registry for the process (it is stateful — a second
+  instance would not see providers registered on the first), and every LLM call goes through its
+  `complete()` wrapper so the configured provider's API key beats any ambient `ANTHROPIC_AUTH_TOKEN`
 
 **Adding a channel**: Create `src/channels/<name>/` with `handler.ts`, `api.ts`, `setup.ts`, `transform.ts`, `format.ts`, then register in `src/channels/index.ts`. No changes needed outside `src/channels/`.
 

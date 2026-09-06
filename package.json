@@ -14,10 +14,9 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@mariozechner/pi-agent-core": "^0.54.2",
-    "@mariozechner/pi-ai": "latest",
-    "@mariozechner/pi-coding-agent": "^0.54.0",
-    "@sinclair/typebox": "^0.34.0",
+    "@earendil-works/pi-agent-core": "^0.85.1",
+    "@earendil-works/pi-ai": "^0.85.1",
+    "@earendil-works/pi-coding-agent": "^0.85.1",
     "inngest": "4.0.0-alpha.6",
     "pino": "^10.3.1"
   },

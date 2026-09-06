@@ -1,45 +1,18 @@
-/** LLM — wrapper around pi-ai's complete() function. */
+/** LLM — wrapper around pi-ai's Models.complete(). */
 
-import { getModel, complete, validateToolArguments } from "@mariozechner/pi-ai";
-import type {
-  Tool,
-  Message,
-  AssistantMessage,
-  KnownProvider,
-  Model,
-  TextContent,
-  ToolCall,
-} from "@mariozechner/pi-ai";
+import { validateToolArguments } from "@earendil-works/pi-ai";
+import type { Tool, Message, AssistantMessage, TextContent, ToolCall } from "@earendil-works/pi-ai";
 import { config } from "../config.ts";
+import { complete, resolveModel } from "./models.ts";
 
 export type { Tool, Message, AssistantMessage, TextContent, ToolCall };
 export { validateToolArguments };
 
-let _model: ReturnType<typeof getModel> | Model<"openai-completions"> | null = null;
+let _model: ReturnType<typeof resolveModel> | null = null;
 
 export function getConfiguredModel() {
   if (!_model) {
-    if (config.llm.openaiBaseUrl) {
-      _model = {
-        id: config.llm.model,
-        name: config.llm.model,
-        api: "openai-completions",
-        provider: config.llm.provider || "openai",
-        baseUrl: config.llm.openaiBaseUrl,
-        reasoning: false,
-        input: ["text"] as const,
-        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-        contextWindow: 128_000,
-        maxTokens: 32_000,
-      } satisfies Model<"openai-completions">;
-    } else {
-      _model = getModel(config.llm.provider as KnownProvider as any, config.llm.model as any);
-      if (!_model) {
-        throw new Error(
-          `Unknown model "${config.llm.model}" for provider "${config.llm.provider}". Check AGENT_MODEL and LLM_PROVIDER env vars.`,
-        );
-      }
-    }
+    _model = resolveModel(config.llm.provider, config.llm.model, config.llm.openaiBaseUrl);
   }
   return _model;
 }

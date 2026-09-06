@@ -3,8 +3,7 @@
 import { appendFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import { resolve } from "path";
-import { getModel, complete } from "@mariozechner/pi-ai";
-import type { KnownProvider, Model } from "@mariozechner/pi-ai";
+import { complete, resolveModel } from "./models.ts";
 import { config } from "../config.ts";
 import { logger } from "./logger.ts";
 
@@ -164,36 +163,19 @@ Respond with ONLY valid JSON, no markdown code fences:
 {"answerType": "debugging", "relevance": N, "completeness": N, "toolEfficiency": N, "tone": N, "issueTags": ["missing_concrete_steps"], "improvementHints": ["Include exact verification commands when the user asks for debugging."], "rationale": "1-2 sentence explanation of biggest weaknesses"}`;
 
 export async function scoreResponse(input: ScoreInput): Promise<ScoreResult> {
-  let model: ReturnType<typeof getModel> | Model<"openai-completions">;
+  // On a custom OpenAI-compatible endpoint, use the agent model unless
+  // SCORING_MODEL was explicitly set to something different from the default.
+  const scoringModelId = config.llm.openaiBaseUrl
+    ? process.env.SCORING_MODEL || config.llm.model
+    : config.scoring.model;
+
+  const model = resolveModel(config.scoring.provider, scoringModelId, config.llm.openaiBaseUrl);
 
   if (config.llm.openaiBaseUrl) {
-    // When using a custom OpenAI-compatible endpoint, use the agent model
-    // unless SCORING_MODEL was explicitly set to something different from the default
-    const scoringModelId = process.env.SCORING_MODEL || config.llm.model;
-    model = {
-      id: scoringModelId,
-      name: scoringModelId,
-      api: "openai-completions",
-      provider: config.scoring.provider || "openai",
-      baseUrl: config.llm.openaiBaseUrl,
-      reasoning: false,
-      input: ["text"] as const,
-      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-      contextWindow: 128_000,
-      maxTokens: 32_000,
-    } satisfies Model<"openai-completions">;
     logger.info(
       { scoringModelId, baseUrl: config.llm.openaiBaseUrl },
       "[scoring] Using custom endpoint",
     );
-  } else {
-    model = getModel(config.scoring.provider as KnownProvider as any, config.scoring.model as any);
-
-    if (!model) {
-      throw new Error(
-        `Unknown scoring model "${config.scoring.model}" for provider "${config.scoring.provider}"`,
-      );
-    }
   }
 
   const prompt = SCORING_PROMPT.replace("{USER_MESSAGE}", input.userMessage.slice(0, 4000))

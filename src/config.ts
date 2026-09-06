@@ -16,8 +16,10 @@ export const config = {
     // pi-ai provider/model format — supports "anthropic", "openai", "google"
     provider: (process.env.LLM_PROVIDER || "anthropic") as "anthropic" | "openai" | "google",
     model: process.env.AGENT_MODEL || "claude-sonnet-4-20250514",
-    // API keys are read from env by pi-ai automatically:
-    //   ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY
+    // API keys are read from env by src/lib/models.ts and passed to pi-ai explicitly:
+    //   ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY (not GOOGLE_API_KEY)
+    // Passing them explicitly means an ambient ANTHROPIC_AUTH_TOKEN or
+    // ANTHROPIC_OAUTH_TOKEN cannot silently outrank the key set here.
     // Optional: override the OpenAI base URL for compatible APIs (e.g. Ollama, LiteLLM, vLLM)
     openaiBaseUrl: process.env.OPENAI_BASE_URL || "",
   },
